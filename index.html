@@ -14,13 +14,13 @@
         body { margin: 0; overflow: hidden; background-color: #000000; font-family: 'Segoe UI', sans-serif; }
         #canvas-container { width: 100%; height: 100vh; display: block; }
         
-        /* UI Center Vandiep */
+        /* UI Center  */
         #ui-layer {
             position: absolute; bottom: 30px; width: 100%;
             text-align: center; pointer-events: none; z-index: 100;
         }
         
-        /* Guide text Vandiep */
+        /* Guide text  */
         .guide { 
             color: rgba(255, 255, 255, 0.6); 
             font-size: 13px; 
@@ -39,7 +39,7 @@
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* Camera Preview Vandiep */
+        /* Camera Preview */
         #camera-preview {
             position: absolute; top: 15px; right: 15px;
             width: 120px; height: 90px;
@@ -47,7 +47,7 @@
             transform: scaleX(-1); opacity: 0.6; border-radius: 8px;
         }
         
-        /* Vandiep */
+        /* */
         #copyright {
             position: absolute;
             bottom: 10px;
@@ -87,17 +87,14 @@
     <div id="error-log"></div>
     <div id="photo-caption"></div>
     
-    <!-- UI Vandiep -->
+    <!-- UI  -->
     <div id="ui-layer">
-        <!-- Vandiep -->
         <div class="guide">
             🖐 <b>Open:</b> Explode &nbsp;|&nbsp; 🫶 <b>Heart:</b> Love &nbsp;|&nbsp; ✊ <b>Fist:</b> Tree; 👉 <b>Fist:</b> point him for hidden gem
         </div>
         <button id="btnStart" onclick="startSystem()">START MAGIC</button>
     </div>
 
-    <!-- Vandiep -->
-    <div id="copyright">© by vandiep</div>
 
     <div id="canvas-container"></div>
     <video class="input_video" style="display:none"></video>
@@ -105,7 +102,7 @@
 
     <script>
         // ==========================================
-        // 1. RESOURCES CONFIG Vandiep
+        // 1. RESOURCES CONFIG 
         // ==========================================
         const MUSIC_URL = "./audio.mp3";
         let bgMusic = new Audio(MUSIC_URL);
@@ -209,7 +206,7 @@
         };
 
         // ==========================================
-        // 2. SYSTEM CONFIG Vandiep
+        // 2. SYSTEM CONFIG 
         // ==========================================
         const CONFIG = {
             goldCount: 2000,
@@ -233,7 +230,7 @@
         let handX = 0.5;
 
         // ==========================================
-        // 3. THREE.JS SYSTEM Vandiep
+        // 3. THREE.JS SYSTEM 
         // ==========================================
         function init3D() {
             const container = document.getElementById('canvas-container');
@@ -422,7 +419,7 @@
             const phases = []; 
             
             for(let i=0; i<count; i++) {
-                // --- TREE Vandiep ---
+                // --- TREE  ---
                 const h = Math.random() * CONFIG.treeHeight; 
                 const y = h - CONFIG.treeHeight / 2;
                 let radiusRatio = (type === 'gold') ? Math.sqrt(Math.random()) : 0.9 + Math.random()*0.1;
@@ -438,7 +435,7 @@
                 const theta = Math.random() * Math.PI * 2;
                 pTreeTargets.push(r * Math.cos(theta), y, r * Math.sin(theta));
 
-                // --- EXPLODE Vandiep ---
+                // --- EXPLODE  ---
                 const u = Math.random();
                 const v = Math.random();
                 const phi = Math.acos(2 * v - 1);
@@ -447,12 +444,12 @@
                 const rad = CONFIG.explodeRadius * Math.cbrt(Math.random()) * radMult;
                 pExplodeTargets.push(rad * Math.sin(phi) * Math.cos(lam), rad * Math.sin(phi) * Math.sin(lam), rad * Math.cos(phi));
 
-                // --- SOFT HEART Vandiep ---
+                // --- SOFT HEART  ---
                 const tHeart = Math.random() * Math.PI * 2;
                 let hx = 16 * Math.pow(Math.sin(tHeart), 3);
                 let hy = 13 * Math.cos(tHeart) - 5 * Math.cos(2*tHeart) - 2 * Math.cos(3*tHeart) - Math.cos(4*tHeart);
                 
-                const rFill = Math.pow(Math.random(), 0.3); // Soft fill Vandiep
+                const rFill = Math.pow(Math.random(), 0.3); // Soft fill 
                 hx *= rFill; hy *= rFill;
                 let hz = (Math.random() - 0.5) * 8 * rFill; 
                 
@@ -464,7 +461,7 @@
                 const scaleH = 2.2;
                 pHeartTargets.push(hx * scaleH, hy * scaleH + 5, hz); 
 
-                // --- EARTH Vandiep ---
+                // --- EARTH  ---
                 const eR = 45;
                 const vnLat = 14 * Math.PI/180, vnLon = 108 * Math.PI/180;
                 const frLat = 46 * Math.PI/180, frLon = 2 * Math.PI/180;
@@ -505,7 +502,7 @@
                 pEarthTargets.push(ex, ey, ez);
                 earthHighlights.push(highlight);
 
-                // --- INIT Vandiep ---
+                // --- INIT  ---
                 pPositions.push(pTreeTargets[i*3], pTreeTargets[i*3+1], pTreeTargets[i*3+2]);
                 sizes.push(size);
                 phases.push(Math.random() * Math.PI * 2);
@@ -515,7 +512,7 @@
             geo.setAttribute('position', new THREE.Float32BufferAttribute(pPositions, 3));
             geo.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
             
-            // Init colors Vandiep
+            // Init colors 
             const colors = new Float32Array(count * 3);
             const baseColor = new THREE.Color();
             if(type === 'gold') baseColor.setHex(0xFFD700);
@@ -614,7 +611,7 @@
         }
 
         function createDecorations() {
-            // MERRY CHRISTMAS Vandiep
+            // MERRY CHRISTMAS 
             const canvas = document.createElement('canvas');
             canvas.width = 1024; canvas.height = 256;
             const ctx = canvas.getContext('2d');
@@ -628,7 +625,7 @@
             titleMesh.position.set(0, 50, 0);
             scene.add(titleMesh);
 
-            // STAR Vandiep
+            // STAR 
             const starCanvas = document.createElement('canvas');
             starCanvas.width = 128; starCanvas.height = 128;
             const sCtx = starCanvas.getContext('2d');
@@ -646,7 +643,7 @@
             starMesh.position.set(0, CONFIG.treeHeight/2 + 2, 0);
             scene.add(starMesh);
 
-            // I LOVE YOU TEXT Vandiep
+            //  dui de text
             const loveCanvas = document.createElement('canvas');
             loveCanvas.width = 1024; loveCanvas.height = 256;
             const lCtx = loveCanvas.getContext('2d');
@@ -673,13 +670,13 @@
             const targetKey = (targetState === 'TREE') ? 'tree' : (targetState === 'HEART' ? 'heart' : (targetState === 'EARTH' ? 'earth' : 'explode'));
             const targets = group.geometry.userData[(targetState === 'PHOTO') ? 'explode' : targetKey];
 
-            // 1. Vandiep
+            // 1. 
             for(let i=0; i<positions.length; i++) {
                 positions[i] += (targets[i] - positions[i]) * speed;
             }
             group.geometry.attributes.position.needsUpdate = true;
             
-            // 2. COLOR & SIZE Vandiep
+            // 2. COLOR & SIZE 
             const count = positions.length / 3;
             
             if (targetState === 'TREE') {
@@ -707,7 +704,7 @@
                 const beatScale = 1 + Math.abs(Math.sin(time * 3)) * 0.15;
                 group.scale.set(beatScale, beatScale, beatScale);
 
-                // Vandiep
+                // 
                 for(let i=0; i<count; i++) {
                     // Use same twinkling logic as tree/explode for consistency
                     let brightness = 1.0;
