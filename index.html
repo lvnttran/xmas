@@ -61,16 +61,37 @@
         }
 
         #error-log { display: none; position: absolute; top: 0; left: 0; color: red; background: rgba(0,0,0,0.8); z-index: 999; padding: 10px; }
+
+        /* Caption Style */
+        #photo-caption {
+            position: absolute;
+            bottom: 20%;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 90;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        #photo-caption.visible {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <div id="error-log"></div>
+    <div id="photo-caption"></div>
     
     <!-- UI Vandiep -->
     <div id="ui-layer">
         <!-- Vandiep -->
         <div class="guide">
-            🖐 <b>Open:</b> Explode &nbsp;|&nbsp; 🫶 <b>Heart:</b> Love &nbsp;|&nbsp; ✊ <b>Fist:</b> Tree
+            🖐 <b>Open:</b> Explode &nbsp;|&nbsp; 🫶 <b>Heart:</b> Love &nbsp;|&nbsp; ✊ <b>Fist:</b> Tree; 👉 <b>Fist:</b> point him for hidden gem
         </div>
         <button id="btnStart" onclick="startSystem()">START MAGIC</button>
     </div>
@@ -91,7 +112,15 @@
         bgMusic.loop = true; bgMusic.volume = 1.0;
 
         const loader = new THREE.TextureLoader();
-        const photoFiles = ['./image1.jpeg', './image2.jpeg', './image3.jpeg', './image4.jpeg', './image5.jpeg'];
+        const photoFiles = ['./image1.jpeg', './image2.jpeg', './image3.jpeg', './image4.jpeg', './image5.jpeg', './image6.jpeg'];
+        const photoCaptions = [
+            "me hem me hem",
+            "dui he",
+            "he huoc qua",
+            "cap cap",
+            "he he @hvyy he he",
+	    "xit ham",
+        ];
         const photoTextures = [];
         photoFiles.forEach((f, i) => photoTextures[i] = loader.load(f));
 
@@ -120,6 +149,51 @@
                 ctx.fillStyle = '#D32F2F'; ctx.fillRect(20, 20, 88, 88);
                 ctx.fillStyle = '#FFD700'; ctx.fillRect(54, 20, 20, 88); ctx.fillRect(20, 54, 88, 20);
                 ctx.strokeStyle = "rgba(0,0,0,0.3)"; ctx.lineWidth=2; ctx.strokeRect(20,20,88,88);
+            } else if (type === 'snow_dot') {
+                const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 50);
+                grd.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grd.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+                grd.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = grd; ctx.fillRect(0,0,128,128);
+            } else if (type === 'santa') {
+                ctx.shadowBlur = 0;
+                // Hat
+                ctx.fillStyle = '#D32F2F'; 
+                ctx.beginPath(); ctx.moveTo(30, 70); ctx.lineTo(98, 70); ctx.lineTo(64, 10); ctx.fill();
+                // Pom-pom
+                ctx.fillStyle = '#FFFFFF'; 
+                ctx.beginPath(); ctx.arc(64, 10, 8, 0, Math.PI*2); ctx.fill();
+                // Face
+                ctx.fillStyle = '#FFCCAA'; 
+                ctx.beginPath(); ctx.arc(64, 75, 25, 0, Math.PI*2); ctx.fill();
+                // Beard
+                ctx.fillStyle = '#FFFFFF'; 
+                ctx.beginPath(); ctx.arc(64, 95, 30, 0, Math.PI*2); ctx.fill();
+                // Hat Trim
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath(); ctx.roundRect(25, 65, 78, 15, 10); ctx.fill();
+                // Eyes
+                ctx.fillStyle = '#000000';
+                ctx.beginPath(); ctx.arc(55, 70, 3, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(73, 70, 3, 0, Math.PI*2); ctx.fill();
+            } else if (type === 'vn_flag') {
+                ctx.beginPath(); ctx.roundRect(10, 30, 108, 68, 15); ctx.clip();
+                ctx.fillStyle = '#DA251D'; ctx.fillRect(0,0,128,128);
+                ctx.fillStyle = '#FFFF00';
+                ctx.beginPath();
+                const cx=64, cy=64, R=25, r=10;
+                for(let i=0; i<5; i++){
+                    ctx.lineTo(cx + Math.cos((18+i*72)/180*Math.PI)*R, cy - Math.sin((18+i*72)/180*Math.PI)*R);
+                    ctx.lineTo(cx + Math.cos((54+i*72)/180*Math.PI)*r, cy - Math.sin((54+i*72)/180*Math.PI)*r);
+                }
+                ctx.closePath(); ctx.fill();
+                ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4; ctx.stroke();
+            } else if (type === 'fr_flag') {
+                ctx.beginPath(); ctx.roundRect(10, 30, 108, 68, 15); ctx.clip();
+                ctx.fillStyle = '#0055A4'; ctx.fillRect(10,30,36,68);
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(46,30,36,68);
+                ctx.fillStyle = '#EF4135'; ctx.fillRect(82,30,36,68);
+                ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4; ctx.stroke();
             }
             return new THREE.CanvasTexture(canvas);
         }
@@ -127,7 +201,11 @@
         const textures = {
             gold: createCustomTexture('gold_glow'),
             red: createCustomTexture('red_light'),
-            gift: createCustomTexture('gift_red')
+            gift: createCustomTexture('gift_red'),
+            snow: createCustomTexture('snow_dot'),
+            santa: createCustomTexture('santa'),
+            vn_flag: createCustomTexture('vn_flag'),
+            fr_flag: createCustomTexture('fr_flag')
         };
 
         // ==========================================
@@ -140,13 +218,15 @@
             explodeRadius: 65,  
             photoOrbitRadius: 25,
             treeHeight: 70,
-            treeBaseRadius: 35
+            treeBaseRadius: 35,
+            snowCount: 1000
         };
 
         let scene, camera, renderer;
-        let groupGold, groupRed, groupGift; 
+        let groupGold, groupRed, groupGift, groupSnow; 
         let photoMeshes = [];    
-        let titleMesh, starMesh, loveMesh;
+        let titleMesh, starMesh, loveMesh, santaMesh, santaTrail, earthFlagGroup;
+        let giftPool = [];
         
         let state = 'TREE'; 
         let selectedIndex = 0;
@@ -171,10 +251,164 @@
             groupGold = createParticleSystem('gold', CONFIG.goldCount, 2.0);
             groupRed = createParticleSystem('red', CONFIG.redCount, 3.5); 
             groupGift = createParticleSystem('gift', CONFIG.giftCount, 3.0); 
+            groupSnow = createSnowSystem(CONFIG.snowCount);
 
             createPhotos();
             createDecorations();
+            createSanta();
+            createEarthFlags();
+            initGiftPool();
             animate();
+        }
+
+        function createEarthFlags() {
+            earthFlagGroup = new THREE.Group();
+            scene.add(earthFlagGroup);
+            
+            const vnMat = new THREE.SpriteMaterial({ map: textures.vn_flag, transparent: true });
+            const vnSprite = new THREE.Sprite(vnMat);
+            const lat = 14 * Math.PI/180, lon = 108 * Math.PI/180, R = 48; 
+            vnSprite.position.set(
+                R * Math.cos(lat) * Math.cos(lon),
+                R * Math.sin(lat),
+                R * Math.cos(lat) * Math.sin(lon)
+            );
+            vnSprite.scale.set(4, 4, 1);
+            earthFlagGroup.add(vnSprite);
+            
+            const frMat = new THREE.SpriteMaterial({ map: textures.fr_flag, transparent: true });
+            const frSprite = new THREE.Sprite(frMat);
+            const lat2 = 46 * Math.PI/180, lon2 = 2 * Math.PI/180;
+            frSprite.position.set(
+                R * Math.cos(lat2) * Math.cos(lon2),
+                R * Math.sin(lat2),
+                R * Math.cos(lat2) * Math.sin(lon2)
+            );
+            frSprite.scale.set(4, 4, 1);
+            earthFlagGroup.add(frSprite);
+            
+            earthFlagGroup.visible = false;
+        }
+
+        function initGiftPool() {
+            const mat = new THREE.SpriteMaterial({ map: textures.gift, transparent: true });
+            for(let i=0; i<20; i++) {
+                const sprite = new THREE.Sprite(mat);
+                sprite.scale.set(0,0,0);
+                sprite.visible = false;
+                sprite.userData = { vel: new THREE.Vector3(), life: 0 };
+                scene.add(sprite);
+                giftPool.push(sprite);
+            }
+        }
+
+        function spawnGiftBurst(pos) {
+            let count = 0;
+            for(let i=0; i<giftPool.length; i++) {
+                if(count >= 5) break;
+                const s = giftPool[i];
+                if(s.userData.life <= 0) {
+                    s.visible = true;
+                    s.position.copy(pos);
+                    s.scale.set(5,5,1);
+                    s.userData.life = 1.0;
+                    s.userData.vel.set(
+                        (Math.random()-0.5)*2,
+                        (Math.random())*2, 
+                        (Math.random()-0.5)*2
+                    );
+                    count++;
+                }
+            }
+        }
+
+        function updateGifts() {
+            giftPool.forEach(s => {
+                if(s.userData.life > 0) {
+                    s.userData.life -= 0.01;
+                    s.position.add(s.userData.vel);
+                    s.userData.vel.y -= 0.05; 
+                    s.material.rotation += 0.1;
+                    if(s.userData.life <= 0) s.visible = false;
+                }
+            });
+        }
+
+        function createSanta() {
+            const mat = new THREE.SpriteMaterial({ map: textures.santa, transparent: true });
+            santaMesh = new THREE.Sprite(mat);
+            santaMesh.scale.set(15, 15, 1);
+            santaMesh.position.set(-100, 40, -20);
+            scene.add(santaMesh);
+
+            // Trail
+            const geo = new THREE.BufferGeometry();
+            const positions = new Float32Array(50 * 3); 
+            const sizes = new Float32Array(50);
+            
+            for(let i=0; i<50; i++) {
+                positions[i*3] = -999; 
+                sizes[i] = 0;
+            }
+            
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            geo.userData = { life: new Float32Array(50).fill(0) };
+
+            const tMat = new THREE.PointsMaterial({
+                size: 2, map: textures.gold, transparent: true, opacity: 0.8,
+                vertexColors: false, color: 0xFFD700, blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            santaTrail = new THREE.Points(geo, tMat);
+            scene.add(santaTrail);
+        }
+
+        function updateSanta(time) {
+            if(!santaMesh) return;
+            
+            // Move Santa: Loop every 20s
+            const cycle = (time * 15) % 400; // 0 to 400
+            const x = cycle - 200; // -200 to 200
+            
+            santaMesh.position.x = x;
+            santaMesh.position.y = 40 + Math.sin(time * 2) * 10;
+            
+            // Trail Logic
+            const positions = santaTrail.geometry.attributes.position.array;
+            const sizes = santaTrail.geometry.attributes.size.array;
+            const life = santaTrail.geometry.userData.life;
+            
+            // Emit
+            let spawnIdx = -1;
+            for(let i=0; i<50; i++) {
+                if(life[i] <= 0) { spawnIdx = i; break; }
+            }
+            
+            if(spawnIdx !== -1 && Math.random() > 0.3) {
+                life[spawnIdx] = 1.0;
+                positions[spawnIdx*3] = santaMesh.position.x - 2; 
+                positions[spawnIdx*3+1] = santaMesh.position.y - 2;
+                positions[spawnIdx*3+2] = santaMesh.position.z;
+                sizes[spawnIdx] = 3.0;
+            }
+            
+            // Update
+            for(let i=0; i<50; i++) {
+                if(life[i] > 0) {
+                    life[i] -= 0.02;
+                    positions[i*3] -= 0.2; 
+                    positions[i*3+1] -= 0.1; 
+                    sizes[i] = life[i] * 3.0; 
+                } else {
+                    positions[i*3] = -999;
+                }
+            }
+            
+            santaTrail.geometry.attributes.position.needsUpdate = true;
+            santaTrail.geometry.attributes.size.needsUpdate = true;
         }
 
         function createParticleSystem(type, count, size) {
@@ -182,6 +416,8 @@
             const pExplodeTargets = [];
             const pTreeTargets = [];
             const pHeartTargets = [];
+            const pEarthTargets = [];
+            const earthHighlights = [];
             const sizes = []; 
             const phases = []; 
             
@@ -190,8 +426,15 @@
                 const h = Math.random() * CONFIG.treeHeight; 
                 const y = h - CONFIG.treeHeight / 2;
                 let radiusRatio = (type === 'gold') ? Math.sqrt(Math.random()) : 0.9 + Math.random()*0.1;
-                const maxR = (1 - (h / CONFIG.treeHeight)) * CONFIG.treeBaseRadius;
-                const r = maxR * radiusRatio; 
+                
+                // Improved shape: Layered Cone
+                const pct = h / CONFIG.treeHeight;
+                let shapeR = CONFIG.treeBaseRadius * (1 - pct);
+                const layers = 5;
+                const layerEffect = Math.pow(Math.sin(pct * Math.PI * layers), 2);
+                shapeR = shapeR * (0.8 + 0.4 * layerEffect);
+
+                const r = shapeR * radiusRatio; 
                 const theta = Math.random() * Math.PI * 2;
                 pTreeTargets.push(r * Math.cos(theta), y, r * Math.sin(theta));
 
@@ -221,6 +464,47 @@
                 const scaleH = 2.2;
                 pHeartTargets.push(hx * scaleH, hy * scaleH + 5, hz); 
 
+                // --- EARTH Vandiep ---
+                const eR = 45;
+                const vnLat = 14 * Math.PI/180, vnLon = 108 * Math.PI/180;
+                const frLat = 46 * Math.PI/180, frLon = 2 * Math.PI/180;
+                const vnx = eR * Math.cos(vnLat) * Math.cos(vnLon);
+                const vny = eR * Math.sin(vnLat);
+                const vnz = eR * Math.cos(vnLat) * Math.sin(vnLon);
+                const frx = eR * Math.cos(frLat) * Math.cos(frLon);
+                const fry = eR * Math.sin(frLat);
+                const frz = eR * Math.cos(frLat) * Math.sin(frLon);
+
+                let ex, ey, ez;
+                let highlight = 0;
+
+                if (type === 'gold' && i < 150) {
+                    const t = i / 150;
+                    const v1 = new THREE.Vector3(vnx, vny, vnz);
+                    const v2 = new THREE.Vector3(frx, fry, frz);
+                    const p = new THREE.Vector3().copy(v1).lerp(v2, t).normalize().multiplyScalar(eR * 1.05);
+                    const arcHeight = Math.sin(t * Math.PI) * 15;
+                    p.add(p.clone().normalize().multiplyScalar(arcHeight));
+                    ex = p.x; ey = p.y; ez = p.z;
+                    highlight = 3; 
+                } else {
+                    const ePhi = Math.acos(2 * Math.random() - 1) - Math.PI/2; 
+                    const eLam = 2 * Math.PI * Math.random() - Math.PI; 
+                    ex = eR * Math.cos(ePhi) * Math.cos(eLam);
+                    ey = eR * Math.sin(ePhi);
+                    ez = eR * Math.cos(ePhi) * Math.sin(eLam);
+                    
+                    const dVn = Math.hypot(ex-vnx, ey-vny, ez-vnz);
+                    const dFr = Math.hypot(ex-frx, ey-fry, ez-frz);
+                    
+                    if(dVn < 10) highlight = 1; 
+                    else if(dFr < 10) highlight = 2; 
+                    else highlight = 0;
+                }
+                
+                pEarthTargets.push(ex, ey, ez);
+                earthHighlights.push(highlight);
+
                 // --- INIT Vandiep ---
                 pPositions.push(pTreeTargets[i*3], pTreeTargets[i*3+1], pTreeTargets[i*3+2]);
                 sizes.push(size);
@@ -246,7 +530,8 @@
             geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
             
             geo.userData = { 
-                tree: pTreeTargets, explode: pExplodeTargets, heart: pHeartTargets, 
+                tree: pTreeTargets, explode: pExplodeTargets, heart: pHeartTargets, earth: pEarthTargets,
+                earthHighlights: earthHighlights,
                 phases: phases, baseColor: baseColor, baseSize: size
             };
 
@@ -263,6 +548,52 @@
             const points = new THREE.Points(geo, mat);
             scene.add(points);
             return points;
+        }
+
+        function createSnowSystem(count) {
+            const positions = [];
+            const velocities = [];
+            for(let i=0; i<count; i++) {
+                positions.push(
+                    (Math.random() - 0.5) * 200, 
+                    Math.random() * 200 - 100,   
+                    (Math.random() - 0.5) * 100  
+                );
+                velocities.push(
+                    (Math.random() - 0.5) * 0.2, 
+                    -(Math.random() * 0.5 + 0.2), 
+                    (Math.random() - 0.5) * 0.2  
+                );
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.userData = { velocities: velocities };
+            const mat = new THREE.PointsMaterial({
+                size: 1.5, map: textures.snow, transparent: true, opacity: 0.8,
+                depthWrite: false, blending: THREE.AdditiveBlending
+            });
+            const points = new THREE.Points(geo, mat);
+            scene.add(points);
+            return points;
+        }
+
+        function updateSnow() {
+            if(!groupSnow) return;
+            const positions = groupSnow.geometry.attributes.position.array;
+            const velocities = groupSnow.geometry.userData.velocities;
+            for(let i=0; i<positions.length/3; i++) {
+                positions[i*3] += velocities[i*3];
+                positions[i*3+1] += velocities[i*3+1];
+                positions[i*3+2] += velocities[i*3+2];
+
+                if(positions[i*3+1] < -100) {
+                    positions[i*3+1] = 100;
+                    positions[i*3] = (Math.random() - 0.5) * 200;
+                    positions[i*3+2] = (Math.random() - 0.5) * 100;
+                }
+            }
+            groupSnow.geometry.attributes.position.needsUpdate = true;
+            groupSnow.rotation.y += 0.001; 
         }
 
         function createPhotos() {
@@ -290,7 +621,7 @@
             ctx.font = 'bold italic 90px "Times New Roman"';
             ctx.fillStyle = '#FFD700'; ctx.textAlign = 'center';
             ctx.shadowColor = "#FF0000"; ctx.shadowBlur = 40; 
-            ctx.fillText("merry xmas @hvyy", 512, 130);
+            ctx.fillText("merry xmas", 512, 130);
             const tex = new THREE.CanvasTexture(canvas);
             const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending });
             titleMesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 15), mat);
@@ -339,7 +670,7 @@
             const baseColor = group.geometry.userData.baseColor;
             const baseSize = group.geometry.userData.baseSize;
             
-            const targetKey = (targetState === 'TREE') ? 'tree' : (targetState === 'HEART' ? 'heart' : 'explode');
+            const targetKey = (targetState === 'TREE') ? 'tree' : (targetState === 'HEART' ? 'heart' : (targetState === 'EARTH' ? 'earth' : 'explode'));
             const targets = group.geometry.userData[(targetState === 'PHOTO') ? 'explode' : targetKey];
 
             // 1. Vandiep
@@ -372,15 +703,51 @@
                 group.geometry.attributes.size.needsUpdate = true;
 
             } else if (targetState === 'HEART') {
-                group.rotation.y = 0;
+                group.rotation.y += 0.003; // Rotate like tree
                 const beatScale = 1 + Math.abs(Math.sin(time * 3)) * 0.15;
                 group.scale.set(beatScale, beatScale, beatScale);
 
                 // Vandiep
                 for(let i=0; i<count; i++) {
-                    colors[i*3] = baseColor.r; colors[i*3+1] = baseColor.g; colors[i*3+2] = baseColor.b;
-                    if (i % 3 === 0) sizes[i] = baseSize;
-                    else sizes[i] = 0;
+                    // Use same twinkling logic as tree/explode for consistency
+                    let brightness = 1.0;
+                    if(type === 'red') {
+                        brightness = 0.5 + 0.5 * Math.sin(time * 3 + phases[i]);
+                    } else if(type === 'gold') {
+                        brightness = 0.8 + 0.4 * Math.sin(time * 10 + phases[i]);
+                    }
+                    colors[i*3]   = baseColor.r * brightness;
+                    colors[i*3+1] = baseColor.g * brightness;
+                    colors[i*3+2] = baseColor.b * brightness;
+                    
+                    sizes[i] = baseSize; // Show all particles
+                }
+                group.geometry.attributes.color.needsUpdate = true;
+                group.geometry.attributes.size.needsUpdate = true;
+
+            } else if (targetState === 'EARTH') {
+                group.rotation.y += 0.005;
+                group.scale.set(1,1,1);
+                
+                const earthHighlights = group.geometry.userData.earthHighlights;
+                
+                for(let i=0; i<count; i++) {
+                    sizes[i] = baseSize;
+                    const hl = earthHighlights[i];
+                    if(hl === 1) { // VN - Red
+                        colors[i*3] = 1.0; colors[i*3+1] = 0.0; colors[i*3+2] = 0.0;
+                        sizes[i] = baseSize * 2;
+                    } else if(hl === 2) { // FR - Blue
+                        colors[i*3] = 0.0; colors[i*3+1] = 0.5; colors[i*3+2] = 1.0;
+                        sizes[i] = baseSize * 2;
+                    } else if(hl === 3) { // Connection - Yellow
+                        colors[i*3] = 1.0; colors[i*3+1] = 1.0; colors[i*3+2] = 0.0;
+                        sizes[i] = baseSize * 1.5;
+                    } else {
+                        // Ocean - Dim Blue
+                        colors[i*3] = 0.0; colors[i*3+1] = 0.2; colors[i*3+2] = 0.4;
+                        sizes[i] = baseSize * 0.8;
+                    }
                 }
                 group.geometry.attributes.color.needsUpdate = true;
                 group.geometry.attributes.size.needsUpdate = true;
@@ -415,6 +782,9 @@
             updateParticleGroup(groupGold, 'gold', state, speed, handRotY, time);
             updateParticleGroup(groupRed, 'red', state, speed, handRotY, time);
             updateParticleGroup(groupGift, 'gift', state, speed, handRotY, time);
+            updateSnow();
+            updateSanta(time);
+            updateGifts();
 
             photoMeshes.forEach((mesh, i) => {
                 if(!mesh.material.map && photoTextures[i]) {
@@ -424,19 +794,28 @@
 
             if (state === 'TREE') {
                 titleMesh.visible = true; starMesh.visible = true; loveMesh.visible = false;
+                earthFlagGroup.visible = false;
                 titleMesh.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
                 starMesh.rotation.z -= 0.02; 
                 starMesh.material.opacity = 0.7 + 0.3*Math.sin(time*5);
                 photoMeshes.forEach(m => { m.scale.lerp(new THREE.Vector3(0,0,0), 0.1); m.visible = false; });
 
+            } else if (state === 'EARTH') {
+                titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = false;
+                earthFlagGroup.visible = true;
+                earthFlagGroup.rotation.y += 0.005;
+                photoMeshes.forEach(m => { m.visible = false; });
+            
             } else if (state === 'HEART') {
                 titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = true;
+                earthFlagGroup.visible = false;
                 photoMeshes.forEach(m => { m.visible = false; });
                 const s = 1 + Math.abs(Math.sin(time*3))*0.1;
                 loveMesh.scale.set(s,s,1);
 
             } else if (state === 'EXPLODE') {
                 titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = false;
+                earthFlagGroup.visible = false;
                 const baseAngle = groupGold.rotation.y; 
                 const angleStep = (Math.PI * 2) / 5;
                 let bestIdx = 0; let maxZ = -999;
@@ -460,6 +839,15 @@
 
             } else if (state === 'PHOTO') {
                 loveMesh.visible = false;
+                earthFlagGroup.visible = false;
+                
+                // Update Caption
+                const captionEl = document.getElementById('photo-caption');
+                if (captionEl) {
+                    captionEl.innerText = photoCaptions[selectedIndex % photoCaptions.length];
+                    captionEl.classList.add('visible');
+                }
+
                 photoMeshes.forEach((mesh, i) => {
                     if (i === selectedIndex) {
                         mesh.position.lerp(new THREE.Vector3(0, 0, 60), 0.1);
@@ -469,6 +857,10 @@
                         mesh.scale.lerp(new THREE.Vector3(0,0,0), 0.1);
                     }
                 });
+            } else {
+                // Hide caption in other states
+                const captionEl = document.getElementById('photo-caption');
+                if (captionEl) captionEl.classList.remove('visible');
             }
             renderer.render(scene, camera);
         }
@@ -488,7 +880,40 @@
             hands.onResults(results => {
                 ctx.clearRect(0,0,100,75); ctx.drawImage(results.image, 0, 0, 100, 75);
 
+                // Update handX
+                if(results.multiHandLandmarks.length > 0) {
+                    handX = results.multiHandLandmarks[0][9].x;
+                }
+
                 // --- Hand Logic  ---
+                if (santaMesh && results.multiHandLandmarks.length > 0) {
+                    const vector = santaMesh.position.clone();
+                    vector.project(camera);
+                    const sx = (vector.x + 1) / 2;
+                    const sy = (-vector.y + 1) / 2;
+                    
+                    // Check index tip (8)
+                    const tip = results.multiHandLandmarks[0][8];
+                    const d = Math.hypot(tip.x - sx, tip.y - sy);
+                    if (d < 0.1) { 
+                        spawnGiftBurst(santaMesh.position);
+                        state = 'EARTH';
+                        return; 
+                    }
+                }
+
+                // Earth Persistence
+                if (state === 'EARTH') {
+                    if(results.multiHandLandmarks.length > 0) {
+                        const lm = results.multiHandLandmarks[0];
+                        const tips = [8,12,16,20]; const wrist = lm[0];
+                        let openDist = 0; tips.forEach(i => openDist += Math.hypot(lm[i].x-wrist.x, lm[i].y-wrist.y));
+                        const avgDist = openDist / 4;
+                        if (avgDist > 0.4) state = 'EXPLODE'; 
+                    }
+                    return; 
+                }
+
                 if (results.multiHandLandmarks.length === 2) {
                     const h1 = results.multiHandLandmarks[0]; const h2 = results.multiHandLandmarks[1];
                     const distIndex = Math.hypot(h1[8].x - h2[8].x, h1[8].y - h2[8].y);
@@ -500,7 +925,7 @@
 
                 if(results.multiHandLandmarks.length > 0) {
                     const lm = results.multiHandLandmarks[0];
-                    handX = lm[9].x; 
+                    // handX already updated
                     const tips = [8,12,16,20]; const wrist = lm[0];
                     let openDist = 0; tips.forEach(i => openDist += Math.hypot(lm[i].x-wrist.x, lm[i].y-wrist.y));
                     const avgDist = openDist / 4;
