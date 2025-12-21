@@ -585,8 +585,8 @@
 
                 if(positions[i*3+1] < -100) {
                     positions[i*3+1] = 100;
-                    positions[i*3] = (Math.random() - 0.5) * 200;
-                    positions[i*3+2] = (Math.random() - 0.5) * 100;
+                    positions[i*3] = (Math.random() - 0.5) * 100;
+                    positions[i*3+2] = (Math.random() - 0.5) * 50;
                 }
             }
             groupSnow.geometry.attributes.position.needsUpdate = true;
