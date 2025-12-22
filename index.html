@@ -81,11 +81,28 @@
         #photo-caption.visible {
             opacity: 1;
         }
+
+        /* Pointer Dot Style */
+        #pointer-dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: rgba(255, 0, 0, 0.8);
+            border: 2px solid #FFD700;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 10px #FFD700;
+            transition: opacity 0.1s;
+        }
     </style>
 </head>
 <body>
     <div id="error-log"></div>
     <div id="photo-caption"></div>
+    <div id="pointer-dot"></div>
     
     <!-- UI  -->
     <div id="ui-layer">
@@ -800,7 +817,7 @@
             } else if (state === 'EARTH') {
                 titleMesh.visible = false; starMesh.visible = false; loveMesh.visible = false;
                 earthFlagGroup.visible = true;
-                earthFlagGroup.rotation.y += 0.005;
+                earthFlagGroup.rotation.y = groupGold.rotation.y;
                 photoMeshes.forEach(m => { m.visible = false; });
             
             } else if (state === 'HEART') {
@@ -874,8 +891,27 @@
             const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
             hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
 
+            // Cache pointer dot element
+            const pointerDot = document.getElementById('pointer-dot');
+
             hands.onResults(results => {
                 ctx.clearRect(0,0,100,75); ctx.drawImage(results.image, 0, 0, 100, 75);
+
+                // --- Pointer Dot Logic ---
+                if (pointerDot) {
+                    if (results.multiHandLandmarks.length > 0) {
+                        const tip = results.multiHandLandmarks[0][8];
+                        // Map normalized coordinates to screen size
+                        const x = tip.x * window.innerWidth;
+                        const y = tip.y * window.innerHeight;
+                        
+                        pointerDot.style.left = x + 'px';
+                        pointerDot.style.top = y + 'px';
+                        pointerDot.style.display = 'block';
+                    } else {
+                        pointerDot.style.display = 'none';
+                    }
+                }
 
                 // Update handX
                 if(results.multiHandLandmarks.length > 0) {
